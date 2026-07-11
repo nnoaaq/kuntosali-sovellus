@@ -1,172 +1,160 @@
 "use client";
-import React, { useState } from "react";
-import { saveExercises } from "@/actions/workout";
-interface AddedExercise {
-  workoutName: string;
-  exerciseName: { id: number; name: string };
-  exerciseSets: number;
-  exerciseReps: number;
-  exerciseWeight: number;
+import { use, useState } from "react";
+interface createdExercise {
+  exercise: { id: number; name: string };
+  sets: { id: number; reps: number; weight: number }[];
 }
 export function WorkoutForm({
   exercises,
 }: {
   exercises: { id: number; name: string }[];
 }) {
-  const [addedExercises, setAddedExercises] = useState<AddedExercise[]>([]);
-  function addExercise(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const foundExercise = exercises.find(
-      (exercisesList) =>
-        exercisesList.id === Number(formData.get("exerciseName")),
+  console.log("exercises : ", exercises);
+  const [newExerciseSets, setNewExerciseSets] = useState([
+    {
+      id: 1,
+      reps: 0,
+      weight: 0,
+    },
+  ]);
+  const [newExercises, setNewExercises] = useState<createdExercise[]>([]);
+  const [newExerciseId, setNewExerciseId] = useState("0");
+  function updateSet(id: number, field: string, value: string) {
+    setNewExerciseSets((oldSets) =>
+      oldSets.map((set) =>
+        set.id === id ? { ...set, [field]: Number(value) } : set,
+      ),
     );
-    const exerciseObj: { id: number; name: string } = foundExercise || {
-      id: 0,
-      name: "Tuntematon liike",
-    };
-    const createdExercise: AddedExercise = {
-      workoutName: String(formData.get("workoutName")),
-      exerciseName: exerciseObj,
-      exerciseSets: Number(formData.get("exerciseSets") || 0),
-      exerciseReps: Number(formData.get("exerciseReps") || 0),
-      exerciseWeight: Number(formData.get("exerciseWeight") || 0),
-    };
-    setAddedExercises((oldExercises) => [...oldExercises, createdExercise]);
   }
-  async function saveWorkout() {
-    saveExercises(addedExercises);
+  function saveExercise() {
+    console.log("HALUTAAN TALLENTAA!!!");
+    console.log("nimi", newExerciseId);
+    console.log("setit", newExerciseSets);
+  }
+  function addExercise() {
+    const foundExercise = exercises.find((e) => e.id === Number(newExerciseId));
+    if (!foundExercise) {
+      return;
+    }
+    const createdExercise: createdExercise = {
+      exercise: foundExercise,
+      sets: newExerciseSets,
+    };
+    setNewExercises((oldExercises) => [...oldExercises, createdExercise]);
+    setNewExerciseSets([{ id: 1, reps: 0, weight: 0 }]);
+    setNewExerciseId("0");
   }
   return (
-    <form
-      className="border p-2 rounded-md flex flex-col gap-2"
-      onSubmit={addExercise}
-    >
-      <h2 className="text-2xl">Lisätyt liikkeet</h2>
-      {addedExercises &&
-        addedExercises.map((addedExercise, index) => (
-          <div
-            key={index}
-            className="flex flex-col border bg-gray-50 border-gray-200 p-2 rounded-sm shadow-sm"
-          >
-            <h3 className="mb-1 border-b border-gray-400 text-xl pb-1">
-              {addedExercise.exerciseName.name}
-            </h3>
-            <table>
-              <thead className="border-b">
-                <tr>
-                  <th className="text-center border-r p-1">Sarjat</th>
-                  <th className="text-center p-1 ">Toistot</th>
-                  <th className="text-center border-l p-1">Painot</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td className="text-center border-r p-1">
-                    {addedExercise.exerciseSets}
-                  </td>
-                  <td className="text-center p-1">
-                    {addedExercise.exerciseReps}
-                  </td>
-                  <td className="text-center border-l p-1">
-                    {addedExercise.exerciseWeight}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        ))}
-      <div className="flex flex-col pb-2">
-        <label className="text-xs font-semibold uppercase tracking-wider text-gray-500 mb-1 block">
-          Treenin nimi
-        </label>
-        <input
-          className="p-1 bg-gray-50 w-full border border-gray-200 rounded-sm"
-          type="text"
-          placeholder="esim. Rinta"
-          name="workoutName"
-        />
-      </div>
-      <div className="flex flex-col border bg-gray-50 border-gray-200 p-2 rounded-sm shadow-sm">
-        <div className="flex justify-between p-2 border-b border-b-gray-400">
-          <div className="flex flex-col">
-            <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 block">
-              Liikkeen nimi
-            </p>
-          </div>
-          <div>
-            <select
-              name="exerciseName"
-              className="text-sm font-semibold bg-transparent text-gray-700 outline-none cursor-pointer hover:text-blue-600 transition-colors "
+    <>
+      <div
+        className={`border bg-gray-100 border-gray-400 rounded-sm shadow-md p-2 ${newExercises && newExercises.length > 0 ? "" : "hidden"}`}
+      >
+        <h3 className="text-lg font-bold">Lisätyt liikkeet ja sarjat</h3>
+        {newExercises &&
+          newExercises.map((exercise, index) => (
+            <div
+              key={index}
+              className="border-b border-gray-400 p-2 flex flex-col"
             >
-              {exercises.map((exercise) => (
+              <p className="pb-1.5">{exercise.exercise.name}</p>
+              <div className="flex gap-2">
+                {exercise.sets.map((set) => (
+                  <div
+                    key={set.id}
+                    className="p-2 border bg-sky-100 border-gray-400 rounded-sm"
+                  >
+                    <p>
+                      {set.reps} x {set.weight} kg
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        <button
+          onClick={saveExercise}
+          className="p-2 border border-green-700 bg-green-700 text-white w-full mt-2 rounded-sm hover:bg-green-800 cursor-pointer"
+        >
+          Tallenna harjoitus
+        </button>
+      </div>
+      <form className="flex flex-col gap-2 border border-gray-400 rounded-md shadow-md p-2">
+        <div>
+          <h3 className="pb-1.5">Lisää uusi liike</h3>
+          <select
+            value={newExerciseId}
+            onChange={(e) => setNewExerciseId(e.target.value)}
+            name="exerciseId"
+            className="p-2 border border-gray-400 bg-gray-200 rounded-sm w-full"
+          >
+            <option value="0">Valitse harjoitus</option>
+            {exercises &&
+              exercises.map((exercise) => (
                 <option key={exercise.id} value={exercise.id}>
                   {exercise.name}
                 </option>
               ))}
-            </select>
-          </div>
+          </select>
         </div>
-        <div className="bg-white p-2 border border-gray-200 rounded-sm">
-          <div className="flex flex-col gap-2">
-            <label className="text-xs font-semibold uppercase tracking-wider text-gray-500  block">
-              Sarjan tiedot
-            </label>
-            <div className="flex gap-2 bg-gray-50 border border-gray-200 rounded-sm">
-              <select
-                name="exerciseSets"
-                defaultValue="3"
-                className="p-2 bg-gray-50 w-12 border-r border-gray-200  [appearance:textfield]"
-              >
-                <option value="1">1</option>
-                <option value="2">2</option>
-                <option value="3">3</option>
-                <option value="4">4</option>
-              </select>
-              <p className="flex justify-center flex-col text-xs font-semibold uppercase tracking-wider text-gray-500">
-                työsarjaa
-              </p>
+        {newExerciseSets &&
+          newExerciseSets.map((exercise) => (
+            <div
+              key={exercise.id}
+              className="p-2 border border-gray-400 rounded-sm flex gap-2"
+            >
+              <div className="flex-1 flex items-center justify-center p-1 text-center ">
+                <p className="text-lg">#{exercise.id}</p>
+              </div>
+              <div className="flex-1 p-1 text-center">
+                <input
+                  onChange={(e) =>
+                    updateSet(exercise.id, "reps", e.target.value)
+                  }
+                  className="p-2 bg-gray-200 w-full border border-gray-400 rounded-md"
+                  type="number"
+                  name="exerciseReps"
+                  placeholder="Toistoa"
+                  value={exercise.reps === 0 ? "" : exercise.reps}
+                />
+              </div>
+              <div className="flex-1 p-1 text-center">
+                <input
+                  onChange={(e) =>
+                    updateSet(exercise.id, "weight", e.target.value)
+                  }
+                  className="p-2 bg-gray-200 w-full border border-gray-400 rounded-md"
+                  type="number"
+                  name="exerciseWeight"
+                  placeholder="Paino (kg)"
+                  value={exercise.weight === 0 ? "" : exercise.weight}
+                />
+              </div>
             </div>
-            <div className="flex gap-2 bg-gray-50 border border-gray-200 rounded-sm">
-              <input
-                type="number"
-                name="exerciseReps"
-                className="p-2 bg-gray-50 w-12 border-r border-gray-200  [appearance:textfield]"
-                placeholder="x"
-              />
-              <p className="flex justify-center flex-col text-xs font-semibold uppercase tracking-wider text-gray-500">
-                toistoja
-              </p>
-            </div>
-            <div className="flex gap-2 bg-gray-50 border border-gray-200 rounded-sm">
-              <input
-                type="number"
-                name="exerciseWeight"
-                className="p-2 bg-gray-50 w-12 border-r border-gray-200  [appearance:textfield]"
-                placeholder="kg"
-              />
-              <p className="flex justify-center flex-col text-xs font-semibold uppercase tracking-wider text-gray-500">
-                aloituspaino
-              </p>
-            </div>
-          </div>
+          ))}
+        <div>
+          <button
+            type="button"
+            onClick={() =>
+              setNewExerciseSets((oldSets) => [
+                ...oldSets,
+                { id: oldSets[oldSets.length - 1].id + 1, reps: 0, weight: 0 },
+              ])
+            }
+            className="p-2 bg-blue-500 w-full text-white border border-blue-600 rounded-sm shadow-md hover:bg-blue-700 cursor-pointer"
+          >
+            Lisää uusi sarja
+          </button>
         </div>
         <div>
           <button
-            type="submit"
-            className="mt-1 p-3 border border-sky-100 bg-sky-600 w-full rounded-md text-white font-bold hover:bg-sky-800 cursor-pointer"
-          >
-            Lisää liike
-          </button>
-          <button
             type="button"
-            onClick={saveWorkout}
-            className="mt-1 p-3 border border-green-100 bg-green-600 w-full rounded-md text-white font-bold hover:bg-green-800 cursor-pointer"
+            onClick={addExercise}
+            className="p-2 bg-green-700 w-full text-white border border-green-600 rounded-sm shadow-md hover:bg-green-900 cursor-pointer"
           >
-            Aloita treeni
+            Tallenna liike
           </button>
         </div>
-      </div>
-    </form>
+      </form>
+    </>
   );
 }

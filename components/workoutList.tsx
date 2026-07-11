@@ -42,15 +42,11 @@ export async function WorkoutList() {
         reps,
         workoutLogId) 
         )`);
-
+  if (error) console.error(error);
   return (
     <div className="p-4 max-w-md mx-auto flex flex-col gap-2">
-      <h2 className="text-2xl py-2">Tehdyt salitreenit</h2>
-      <button className="p-3 border border-green-400 bg-green-600 w-full rounded-md text-white font-bold hover:bg-green-800 cursor-pointer">
-        Aloita uusi treeni
-      </button>
       <WorkoutForm exercises={exercises || []} />
-
+      <h2 className="text-2xl py-2">Suoritetut kuntosalitreenit</h2>
       {workouts?.map((workout) => (
         <WorkoutCard key={workout.id} workout={workout as any as workoutType} />
       ))}
