@@ -24,11 +24,9 @@ interface workoutType {
   }[];
 }
 export function WorkoutCard({ workout }: { workout: workoutType }) {
-  const [isOpen, setIsOpen] = useState(true);
-  console.log("TIEDOT:", workout);
-  console.log("WORKOUTLOGS:", workout.workoutLogs);
+  const [isOpen, setIsOpen] = useState(false);
   return (
-    <div className="border shadow-lg rounded-md p-2 m-1">
+    <div className="border shadow-lg rounded-md p-2">
       <div
         key={workout.id}
         className="flex justify-between"
