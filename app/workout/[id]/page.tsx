@@ -1,22 +1,28 @@
 import { ActiveWorkout } from "@/components/activeWorkout";
 import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
-interface workoutTemplate {
+interface WorkoutDataType {
   id: number;
-  userId: number;
   name: string;
-  WorkoutTemplateExercises: {
+  startTime: string;
+  WorkoutTemplates: {
     id: number;
-    exerciseId: number;
-    Exercises: { name: string; id: number };
-    workoutTemplateId: number;
-    WorkoutTemplateSets: {
+    name: string;
+    WorkoutTemplateExercises: {
+      exerciseId: number;
       id: number;
-      reps: number;
-      weight: number;
-      workoutTemplateExerciseId: number;
+      workoutTemplateId: number;
+      Exercises: {
+        id: number;
+        name: string;
+      };
+      WorkoutTemplateSets: {
+        id: number;
+        reps: number;
+        weight: number;
+      }[];
     }[];
-  }[];
+  };
 }
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -25,14 +31,17 @@ export default async function Page({ params }: PageProps) {
   const { id } = await params;
   const cookieStore = await cookies();
   const dataBase = createClient(cookieStore);
-  const { data: workoutTemplateData, error: workoutTemplateError } =
-    await dataBase
-      .from("WorkoutTemplates")
-      .select(
-        `
+  const { data: workoutData, error: workoutDataError } = await dataBase
+    .from("Workouts")
+    .select(
+      `
         id,
-        userId,
         name,
+        startTime,
+        WorkoutTemplates(
+        id,
+        name,
+        userId,
         WorkoutTemplateExercises (
           id,
           workoutTemplateId,
@@ -45,17 +54,15 @@ export default async function Page({ params }: PageProps) {
             weight
           )
         )
-      `,
       )
-      .eq("id", id)
-      .single<workoutTemplate>();
-  if (workoutTemplateError) console.error(workoutTemplateError);
-
+      `,
+    )
+    .eq("id", id)
+    .single<WorkoutDataType>();
+  if (workoutDataError) console.error(workoutDataError);
   return (
     <div className="flex flex-col items-center w-full min-h-screen justify-center p-2">
-      {workoutTemplateData && (
-        <ActiveWorkout workoutTemplateData={workoutTemplateData} />
-      )}
+      {workoutData && <ActiveWorkout {...workoutData} />}
     </div>
   );
 }

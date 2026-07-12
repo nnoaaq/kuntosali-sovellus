@@ -32,12 +32,12 @@ export function WorkoutForm({
   async function saveExercise() {
     const workoutTemplateData = await saveWorkoutTemplate(newExercises);
     // {success:boolean,error:false/syy,id:number}
-    // id = luotu workoutTemplateId
+    // id = luotu Workout.id
 
     if (workoutTemplateData.success) {
       // Kaikki ok > treenipohja luotu onnistuneesti
       setNewExercises([]);
-      router.push(`/workout/${workoutTemplateData.id}`);
+      router.push(`/workout/${workoutTemplateData.workoutId}`);
     }
   }
   function addExercise() {

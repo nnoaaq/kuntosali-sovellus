@@ -68,5 +68,13 @@ export async function saveWorkoutTemplate(exercisesList: exercise[]) {
         };
     }
   }
-  return { success: true, error: false, id: workoutTemplateId };
+  const { data: newWorkoutData, error: newWorkoutError } = await dataBase
+    .from("Workouts")
+    .insert({
+      workoutTemplate: workoutTemplateId,
+      name: "TUO TÄNNE NIMI SIVULTA",
+    })
+    .select("id")
+    .single();
+  return { success: true, error: false, workoutId: newWorkoutData?.id };
 }
