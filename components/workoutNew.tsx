@@ -1,4 +1,6 @@
 "use client";
+import { saveWorkoutTemplate } from "@/actions/workout";
+import { useRouter } from "next/navigation";
 import { use, useState } from "react";
 interface createdExercise {
   exercise: { id: number; name: string };
@@ -9,6 +11,7 @@ export function WorkoutForm({
 }: {
   exercises: { id: number; name: string }[];
 }) {
+  const router = useRouter();
   console.log("exercises : ", exercises);
   const [newExerciseSets, setNewExerciseSets] = useState([
     {
@@ -26,10 +29,16 @@ export function WorkoutForm({
       ),
     );
   }
-  function saveExercise() {
-    console.log("HALUTAAN TALLENTAA!!!");
-    console.log("nimi", newExerciseId);
-    console.log("setit", newExerciseSets);
+  async function saveExercise() {
+    const workoutTemplateData = await saveWorkoutTemplate(newExercises);
+    // {success:boolean,error:false/syy,id:number}
+    // id = luotu workoutTemplateId
+
+    if (workoutTemplateData.success) {
+      // Kaikki ok > treenipohja luotu onnistuneesti
+      setNewExercises([]);
+      router.push(`/workout/${workoutTemplateData.id}`);
+    }
   }
   function addExercise() {
     const foundExercise = exercises.find((e) => e.id === Number(newExerciseId));
