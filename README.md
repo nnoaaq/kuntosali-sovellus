@@ -11,67 +11,48 @@
 - PostgreSQL
 
 ```dbml
-Table "Users" {
-  "id" INTEGER [pk, increment]
-  "email" text [unique]
-  "password_hash" text
+Table Users {
+  id integer [pk, increment]
+  email text [unique]
+  passwordHash text
 }
-
-// AKTIIVISET TREENIT
-Table "Workouts" {
-  "id" INTEGER [pk, increment]
-  "userId" integer
-  "startTime" timestamp [default: 'now()']
-  "endTime" timestamp
-  "name" text
+Table Exercises {
+  id integer [pk, increment]
+  name text [unique]
 }
-
-Table "Exercises" {
-  "id" INTEGER [pk, increment]
-  "name" text
+Table WorkoutTemplates {
+  id integer [pk, increment]
+  name text
 }
-
-Table "WorkoutLog" {
-  "id" INTEGER [pk, increment]
-  "workoutId" integer
-  "exerciseId" integer
+Table WorkoutTemplateExercises {
+  id integer [pk, increment]
+  exerciseId integer [ref: > Exercises.id]
+  workoutTemplateId integer [ref : > WorkoutTemplates.id]
 }
-
-Table "Sets" {
-  "id" INTEGER [pk, increment]
-  "weight" decimal
-  "reps" integer
-  "workoutLogId" integer
+Table WorkoutTemplateSets {
+  id integer [pk, increment]
+  reps integer
+  weight integer
+  workoutTemplateExerciseId integer [ref: > WorkoutTemplateExercises.id]
 }
-
-// TREENIPOHJAT (TEMPLATES)
-Table "WorkoutTemplates" {
-  "id" integer [pk, increment]
-  "userId" integer
-  "name" text
+Table Workouts {
+  id integer [pk, increment]
+  name text
+  startTime timestamp [default: `now()`]
+  endTime timestamp
+  userId integer [ref : > Users.id]
+  workoutTemplateId integer [ref: > WorkoutTemplates.id]
 }
-
-Table "WorkoutTemplateExercises" {
-  "id" integer [pk, increment]
-  "workoutTemplateId" integer
-  "exerciseId" integer
+Table WorkoutExercises {
+  id integer [pk, increment]
+  exerciseId integer [ref : > Exercises.id]
+  workoutId integer [ref : > Workouts.id]
 }
-
-Table "WorkoutTemplateSets" {
-  "id" integer [pk, increment]
-  "workoutTemplateExerciseId" integer
-  "reps" integer
-  "weight" decimal // Muutettu integer -> decimal, jos haluaa esim. 2.5 kg painot
+Table WorkoutSets {
+  id integer [pk, increment]
+  reps integer
+  weight integer
+  order integer
+  workoutExerciseId integer [ref : > WorkoutExercises.id]
 }
-
-// YHTEYDET (REFS)
-Ref: "Users"."id" < "Workouts"."userId"
-Ref: "Workouts"."id" < "WorkoutLog"."workoutId"
-Ref: "Exercises"."id" < "WorkoutLog"."exerciseId"
-Ref: "WorkoutLog"."id" < "Sets"."workoutLogId"
-
-Ref: "Users"."id" < "WorkoutTemplates"."userId"
-Ref: "WorkoutTemplates"."id" < "WorkoutTemplateExercises"."workoutTemplateId"
-Ref: "Exercises"."id" < "WorkoutTemplateExercises"."exerciseId"
-Ref: "WorkoutTemplateExercises"."id" < "WorkoutTemplateSets"."workoutTemplateExerciseId"
 ```
