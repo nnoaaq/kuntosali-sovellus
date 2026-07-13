@@ -1,4 +1,5 @@
 "use client";
+import { createNewWorkout } from "@/actions/newWorkout";
 import { useState } from "react";
 
 interface Workout {
@@ -321,8 +322,7 @@ export function CreateWorkout({
                       text: "Lisää harjoitukseen vähintään yksi liike",
                     });
                   }
-                  console.log("VIEDÄÄN TIETOKANTAAAN");
-                  console.log(workout);
+                  createNewWorkout(workout);
                 }}
               >
                 Aloita harjoitus
