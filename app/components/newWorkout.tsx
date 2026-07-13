@@ -259,18 +259,27 @@ export function CreateWorkout({
                             onClick={() => {
                               setWorkout((prevWorkout) => ({
                                 ...prevWorkout,
-                                exercises: prevWorkout.exercises.map((item) =>
-                                  item.id === exercise.id
-                                    ? {
-                                        ...item,
-                                        sets: item.sets
-                                          .filter((s) => s.order !== set?.order)
-                                          .map((s, index) => ({
+                                exercises: prevWorkout.exercises.flatMap(
+                                  (item) => {
+                                    if (item.id === exercise.id) {
+                                      const updatedSets = item.sets.filter(
+                                        (s) => s.order !== set?.order,
+                                      );
+                                      if (updatedSets.length === 0) {
+                                        return [];
+                                      }
+                                      return [
+                                        {
+                                          ...item,
+                                          sets: updatedSets.map((s, index) => ({
                                             ...s,
                                             order: index + 1,
                                           })),
-                                      }
-                                    : item,
+                                        },
+                                      ];
+                                    }
+                                    return [item];
+                                  },
                                 ),
                               }));
                             }}
