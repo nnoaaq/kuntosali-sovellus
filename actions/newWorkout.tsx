@@ -18,8 +18,10 @@ interface Workout {
 export async function createNewWorkout(workout: Workout) {
   const cookieStore = await cookies();
   const database = await createClient(cookieStore);
-  const { data: workoutTemplateId, error: workoutTemplateError } =
-    await database.rpc("saveworkout", { workout: workout });
-  if (workoutTemplateError) console.error(workoutTemplateError);
-  redirect(`/workouts/${workoutTemplateId}`);
+  const { data: workoutId, error: workoutError } = await database.rpc(
+    "saveworkout",
+    { workout: workout },
+  );
+  if (workoutError) console.error(workoutError);
+  redirect(`/workouts/${workoutId}`);
 }

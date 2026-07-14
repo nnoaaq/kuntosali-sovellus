@@ -70,6 +70,7 @@ DECLARE
     workoutTemplateId int;
     workoutTemplateExerciseId int;
     workoutTemplateSetId int;
+    workoutId int;
 BEGIN
     workoutName := workout->>'name';
     -- Luodaan WorkoutTemplate ja tallennetaan ID
@@ -104,7 +105,14 @@ BEGIN
         returning id into workoutTemplateSetId;
         END LOOP;
     END LOOP;
-    RETURN workoutTemplateId;
+    -- Luodaan vielä Workout ja liitetään tämä luotu template siihen
+    insert into
+    "Workouts"
+    (name,"userId","workoutTemplateId")
+    values(workoutName,1,workoutTemplateId)
+    returning id into workoutId;
+    RETURN workoutId;
 END;
 $$ LANGUAGE plpgsql;
+
 ```

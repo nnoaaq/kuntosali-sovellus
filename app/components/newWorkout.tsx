@@ -18,6 +18,7 @@ export function CreateWorkout({
 }: {
   exercises: { id: number; name: string }[];
 }) {
+  const [newExercise, setNewExercise] = useState<number | null>(null);
   const [error, setError] = useState<{ id: number; text: string } | null>();
   const [formVisible, setFormVisible] = useState(true);
   const [workout, setWorkout] = useState<Workout>({ name: "", exercises: [] });
@@ -53,7 +54,7 @@ export function CreateWorkout({
       </button>
       {formVisible && (
         <div className="p-2 border border-gray-400 rounded shadow">
-          <form>
+          <form onSubmit={(e) => e.preventDefault()}>
             <div className="flex flex-col">
               <label
                 htmlFor="workoutName"
@@ -84,39 +85,64 @@ export function CreateWorkout({
                 Lisää liike
               </label>
 
-              <select
-                onChange={(e) => {
-                  if (error?.id == 2) setError(null);
-                  if (
-                    !workout.exercises.some(
-                      (exercise) => exercise.id === Number(e.target.value),
-                    )
-                  ) {
-                    if (e.target.value !== "0") {
+              <div className="flex justify-between border border-gray-400 rounded">
+                <select
+                  onChange={(e) => {
+                    if (error?.id == 2) setError(null);
+                    if (
+                      !workout.exercises.some(
+                        (exercise) => exercise.id === Number(e.target.value),
+                      )
+                    ) {
+                      if (e.target.value !== "0") {
+                        return setNewExercise(Number(e.target.value));
+                      }
+                      setNewExercise(null);
+                    }
+                  }}
+                  name="exerciseName"
+                  id=""
+                  className="p-2 w-full"
+                >
+                  <option value="0">Valitse liike listasta</option>
+                  {exercises.map((exercise) => (
+                    <option key={exercise.id} value={exercise.id}>
+                      {exercise.name}
+                    </option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  onClick={() => {
+                    console.log(newExercise);
+                    if (newExercise) {
+                      if (
+                        workout.exercises.some(
+                          (exercise) => exercise.id === newExercise,
+                        )
+                      ) {
+                        return setError({
+                          id: 3,
+                          text: "Valittu liike on jo lisätty harjoitukseen",
+                        });
+                      }
                       setWorkout((prevWorkout) => ({
                         ...prevWorkout,
                         exercises: [
                           ...prevWorkout.exercises,
                           {
-                            id: Number(e.target.value),
+                            id: Number(newExercise),
                             sets: [{ order: 1, reps: 0, weight: 0 }],
                           },
                         ],
                       }));
                     }
-                  }
-                }}
-                name="exerciseName"
-                id=""
-                className="border border-gray-400 p-2  mt-1.5 w-full rounded"
-              >
-                <option value="0">Valitse liike listasta</option>
-                {exercises.map((exercise) => (
-                  <option key={exercise.id} value={exercise.id}>
-                    {exercise.name}
-                  </option>
-                ))}
-              </select>
+                  }}
+                  className="p-2 bg-blue-500 text-white w-30 hover:bg-blue-600 cursor-pointer text-gray-500 "
+                >
+                  Lisää
+                </button>
+              </div>
             </div>
             <div className="flex flex-col gap-2 pt-2">
               {workout.exercises.map((exercise) => (
@@ -314,10 +340,13 @@ export function CreateWorkout({
                 type="button"
                 onClick={() => {
                   if (workout.name.length == 0) {
-                    setError({ id: 1, text: "Harjoituksella on oltava nimi" });
+                    return setError({
+                      id: 1,
+                      text: "Harjoituksella on oltava nimi",
+                    });
                   }
                   if (workout.exercises.length == 0) {
-                    setError({
+                    return setError({
                       id: 2,
                       text: "Lisää harjoitukseen vähintään yksi liike",
                     });

@@ -4,10 +4,22 @@ import { cookies } from "next/headers";
 interface Workout {
   id: number;
   name: string;
-  exercises: {
+  startTime: string;
+  endTime: string | null;
+  WorkoutTemplates: {
     id: number;
-    sets: { id: number; reps: number; order: number; weight: number }[];
-  }[];
+    WorkoutTemplateExercises: {
+      id: number;
+      Exercises: { id: number; name: string };
+      exerciseId: number;
+      WorkoutTemplateSets: {
+        id: number;
+        reps: number;
+        weight: number;
+        order: number;
+      }[];
+    }[];
+  };
 }
 export default async function Home({
   params,
@@ -19,12 +31,23 @@ export default async function Home({
   const cookieStore = await cookies();
   const database = await createClient(cookieStore);
   const { data: workoutData, error: workoutError } = (await database
-    .from("WorkoutTemplates")
+    .from("Workouts")
     .select(
       `
-        id, name,
-        exercises : WorkoutTemplateExercises (id,sets: WorkoutTemplateSets (id,order,reps,weight))
+       id,
+       name,
+       startTime,
+       endTime,
+        WorkoutTemplates(
+        id,
+          WorkoutTemplateExercises(
+          id,
+          Exercises(id,name),
+          exerciseId,
+            WorkoutTemplateSets(id,reps,weight,order)
+          )
         )
+      )
         `,
     )
     .eq("id", paramsData.id)
