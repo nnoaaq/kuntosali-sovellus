@@ -48,12 +48,12 @@ export async function CompletedWorkouts() {
       <h2 className="font-semibold text-zinc-500 tracking-wide uppercase">
         Suoritetut treenit
       </h2>
-      <div className="flex flex-col gap-2 p-2 rounded">
+      <div className="flex flex-col gap-5 p-2">
         {workouts &&
           workouts.map((workout) => (
             <div
               key={workout.id}
-              className="flex flex-col gap-2 rounded-lg shadow shadow-zinc-900 bg-zinc-900"
+              className="flex flex-col gap-1 rounded-lg shadow shadow-zinc-900 bg-zinc-900"
             >
               <div className="p-2 pb-0 flex justify-between">
                 <div className="w-2/3">
@@ -88,7 +88,7 @@ export async function CompletedWorkouts() {
                   )}
                 </div>
               </div>
-              <div className="flex flex-col gap-2 p-2 bg-zinc-950/40">
+              <div className="flex flex-col gap-4 p-2 bg-zinc-950/90">
                 {workout.WorkoutExercises.map((exercise) => (
                   <div key={exercise.id}>
                     <p className="text-sm font-semibold text-zinc-400 uppercase tracking-wider">
