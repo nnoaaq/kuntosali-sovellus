@@ -17,6 +17,7 @@ interface Workout {
         reps: number;
         weight: number;
         order: number;
+        finished: boolean;
       }[];
     }[];
   };
@@ -55,7 +56,7 @@ export default async function Home({
   if (workoutError) console.error(workoutError);
 
   return (
-    <div className="flex p-2 justify-center min-h-screen">
+    <div className="flex p-2 justify-center min-h-screen bg-zinc-950">
       <ActiveWorkout workout={workoutData} />
     </div>
   );

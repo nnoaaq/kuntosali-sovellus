@@ -1,1 +1,62 @@
 @import "tailwindcss";
+@theme {
+  --color-ink-black-50: #e6f7fe;
+  --color-ink-black-100: #cef0fd;
+  --color-ink-black-200: #9ce1fc;
+  --color-ink-black-300: #6bd2fa;
+  --color-ink-black-400: #39c3f9;
+  --color-ink-black-500: #08b3f7;
+  --color-ink-black-600: #0690c6;
+  --color-ink-black-700: #056c94;
+  --color-ink-black-800: #034863;
+  --color-ink-black-900: #022431;
+  --color-ink-black-950: #01161e;
+
+  --color-watermelon-50: #fde7ec;
+  --color-watermelon-100: #fbd0d8;
+  --color-watermelon-200: #f7a1b2;
+  --color-watermelon-300: #f4718b;
+  --color-watermelon-400: #f04265;
+  --color-watermelon-500: #ec133e;
+  --color-watermelon-600: #bd0f32;
+  --color-watermelon-700: #8e0b25;
+  --color-watermelon-800: #5e0819;
+  --color-watermelon-900: #2f040c;
+  --color-watermelon-950: #210309;
+
+  --color-jungle-teal-50: #eff5f2;
+  --color-jungle-teal-100: #dfece5;
+  --color-jungle-teal-200: #c0d8cb;
+  --color-jungle-teal-300: #a0c5b1;
+  --color-jungle-teal-400: #81b197;
+  --color-jungle-teal-500: #619e7d;
+  --color-jungle-teal-600: #4e7e64;
+  --color-jungle-teal-700: #3a5f4b;
+  --color-jungle-teal-800: #273f32;
+  --color-jungle-teal-900: #132019;
+  --color-jungle-teal-950: #0e1612;
+
+  --color-baltic-blue-50: #eff1f5;
+  --color-baltic-blue-100: #dfe3ec;
+  --color-baltic-blue-200: #bfc6d9;
+  --color-baltic-blue-300: #9faac6;
+  --color-baltic-blue-400: #808eb3;
+  --color-baltic-blue-500: #60729f;
+  --color-baltic-blue-600: #4d5b80;
+  --color-baltic-blue-700: #394460;
+  --color-baltic-blue-800: #262d40;
+  --color-baltic-blue-900: #131720;
+  --color-baltic-blue-950: #0d1016;
+
+  --color-ghost-white-50: #e5e5ff;
+  --color-ghost-white-100: #ccccff;
+  --color-ghost-white-200: #9999ff;
+  --color-ghost-white-300: #6666ff;
+  --color-ghost-white-400: #3333ff;
+  --color-ghost-white-500: #0000ff;
+  --color-ghost-white-600: #0000cc;
+  --color-ghost-white-700: #000099;
+  --color-ghost-white-800: #000066;
+  --color-ghost-white-900: #000033;
+  --color-ghost-white-950: #000024;
+}

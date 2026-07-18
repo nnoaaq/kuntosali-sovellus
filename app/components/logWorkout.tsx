@@ -1,7 +1,8 @@
 "use client";
 
+import { saveWorkout } from "@/actions/saveWorkout";
 import { formatTime } from "@/utils/time";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface Workout {
   id: number;
@@ -33,6 +34,7 @@ export function ActiveWorkout({ workout }: { workout: Workout }) {
       }[]
     | null
   >(null);
+
   const [currentWorkout, setCurrentWorkout] = useState({
     exercises: workout.WorkoutTemplates.WorkoutTemplateExercises.map(
       (exercise) => ({
@@ -46,19 +48,24 @@ export function ActiveWorkout({ workout }: { workout: Workout }) {
   });
   if (!workout) return "ei workouttia";
   return (
-    <div className="border h-full w-100 border-gray-400 rounded flex flex-col gap-2">
-      <div className="border-b border-gray-400 p-2">
-        <h3 className="text-xl">{workout.name}</h3>
-        <p className="text-sm text-gray-500">{formatTime(workout.startTime)}</p>
+    <div className="border h-full w-100 border-zinc-800 rounded flex flex-col gap-2 bg-zinc-900">
+      <div className="border-b border-zinc-700 p-2 flex justify-between">
+        <div>
+          <h3 className="text-xl text-zinc-400">{workout.name}</h3>
+          <p className="text-sm text-zinc-600">
+            {formatTime(workout.startTime)}
+          </p>
+        </div>
+        <div></div>
       </div>
       <div>
         <div className="flex flex-col gap-2 p-2">
           {currentWorkout.exercises.map((workoutExercise) => (
             <div
-              className="border border-gray-400 rounded p-2"
+              className="border border-zinc-800 rounded p-2"
               key={workoutExercise.id}
             >
-              <p>{workoutExercise.Exercises.name}</p>
+              <p className="text-zinc-500">{workoutExercise.Exercises.name}</p>
               <div>
                 {errors &&
                   errors.map(
@@ -66,16 +73,16 @@ export function ActiveWorkout({ workout }: { workout: Workout }) {
                       error.exercise === workoutExercise.Exercises.id && (
                         <div
                           key={error.exercise}
-                          className="mt-1.5 w-full border border-red-200 p-2 bg-red-100 rounded-md flex justify-between"
+                          className="mt-1.5 w-full border border-yellow-800 p-2 bg-yellow-950 rounded-md flex justify-between"
                         >
-                          <p className="text-red-800">{error.text}</p>
+                          <p className="text-yellow-600">{error.text}</p>
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
                             fill="none"
                             viewBox="0 0 24 24"
                             strokeWidth={1.5}
                             stroke="currentColor"
-                            color="red"
+                            color="var(--color-yellow-600)"
                             onClick={() => {
                               setErrors((prevErrors) =>
                                 prevErrors
@@ -102,18 +109,18 @@ export function ActiveWorkout({ workout }: { workout: Workout }) {
                   <thead>
                     <tr>
                       <th className="w-6"></th>
-                      <th className="w-6 text-gray-500 uppercase tracking-wide">
+                      <th className="w-6 text-zinc-500 uppercase tracking-wide">
                         #
                       </th>
-                      <th className="w-6 text-gray-500 uppercase tracking-wide">
+                      <th className="w-6 text-zinc-500 uppercase tracking-wide">
                         Toistot
                       </th>
-                      <th className="w-6 text-gray-500 uppercase tracking-wide"></th>
-                      <th className="w-6 text-gray-500 uppercase tracking-wide">
+                      <th className="w-6 text-zinc-500 uppercase tracking-wide"></th>
+                      <th className="w-6 text-zinc-500 uppercase tracking-wide">
                         Paino
                       </th>
                       <th className="w-6 text-gray-500 uppercase tracking-wide"></th>
-                      <th className="cursor-pointer">
+                      <th className="cursor-pointer text-zinc-500">
                         <svg
                           onClick={() => {
                             setCurrentWorkout((prevState) => {
@@ -169,35 +176,56 @@ export function ActiveWorkout({ workout }: { workout: Workout }) {
                         <td>
                           <div
                             onClick={() => {
-                              console.log(currentWorkout);
-                              setCurrentWorkout((prevState) => {
-                                return {
-                                  ...prevState,
-                                  exercises: prevState.exercises.map(
-                                    (exercise) => ({
-                                      ...exercise,
-                                      WorkoutTemplateSets:
-                                        exercise.WorkoutTemplateSets.map(
-                                          (set) =>
-                                            set.id === workoutSet.id
-                                              ? {
-                                                  ...set,
-                                                  finished: !set.finished,
-                                                }
-                                              : set,
-                                        ),
-                                    }),
-                                  ),
-                                };
-                              });
+                              const updatedExercises =
+                                currentWorkout.exercises.map((exercise) => {
+                                  const updatedSets =
+                                    exercise.WorkoutTemplateSets.map((set) =>
+                                      set.id === workoutSet.id
+                                        ? { ...set, finished: !set.finished }
+                                        : set,
+                                    );
+
+                                  return {
+                                    ...exercise,
+                                    WorkoutTemplateSets: updatedSets,
+                                  };
+                                });
+
+                              setCurrentWorkout((prevState) => ({
+                                ...prevState,
+                                exercises: updatedExercises,
+                              }));
+                              // Tarkistetaan onko kaikki sarjat OK
+                              const updatedCurrentExercise =
+                                updatedExercises.find(
+                                  (ex) => ex.id === workoutExercise.id,
+                                );
+                              if (updatedCurrentExercise) {
+                                const hasUnfinishedSets =
+                                  updatedCurrentExercise.WorkoutTemplateSets.some(
+                                    (set) => !set.finished,
+                                  );
+
+                                if (!hasUnfinishedSets) {
+                                  setErrors((prevErrors) =>
+                                    prevErrors
+                                      ? prevErrors?.filter(
+                                          (error) =>
+                                            error.exercise !==
+                                            workoutExercise.Exercises.id,
+                                        )
+                                      : [],
+                                  );
+                                }
+                              }
                             }}
                             className={`border border-gray-400 mx-auto w-[15px] h-[15px] rounded-full hover:bg-green-600 cursor-pointer ${workoutSet.finished && "bg-green-600"}`}
                           ></div>
                         </td>
-                        <td className="w-6 p-2 text-center">
+                        <td className="w-6 p-2 text-center text-zinc-500">
                           {workoutSet.order}
                         </td>
-                        <td className="w-6 p-2 text-center">
+                        <td className="w-6 p-2 text-center text-zinc-500">
                           <input
                             onChange={(e) => {
                               setCurrentWorkout((prevState) => {
@@ -224,11 +252,11 @@ export function ActiveWorkout({ workout }: { workout: Workout }) {
                             placeholder={String(workoutSet.reps)}
                             type="number"
                             name="setReps"
-                            className="p-2 text-center border border-gray-400 rounded w-15 bg-gray-100 [appearance:textfield]"
+                            className="p-2 text-center border border-zinc-700 rounded w-15 bg-zinc-700 [appearance:textfield]"
                           />
                         </td>
-                        <td className="w-6 p-2 text-center">x</td>
-                        <td className="w-6 p-2 text-center">
+                        <td className="w-6 p-2 text-center text-zinc-500">x</td>
+                        <td className="w-6 p-2 text-center text-zinc-500">
                           <input
                             onChange={(e) => {
                               setCurrentWorkout((prevState) => {
@@ -257,11 +285,13 @@ export function ActiveWorkout({ workout }: { workout: Workout }) {
                             placeholder={String(workoutSet.weight)}
                             type="number"
                             name="setWeight"
-                            className="p-2 text-center border border-gray-400 rounded w-15 bg-gray-100 [appearance:textfield]"
+                            className="p-2 text-center border border-zinc-700 rounded w-15 bg-zinc-700 [appearance:textfield]"
                           />
                         </td>
-                        <td className="w-6 p-2 text-center">kg</td>
-                        <td className="w-6 text-center cursor-pointer">
+                        <td className="w-6 p-2 text-center text-zinc-500">
+                          kg
+                        </td>
+                        <td className="w-6 text-center cursor-pointer text-zinc-500">
                           <svg
                             onClick={() => {
                               setCurrentWorkout((prevState) => {
@@ -326,8 +356,17 @@ export function ActiveWorkout({ workout }: { workout: Workout }) {
                   });
                 }
               }
+              if (errors?.length == 0) {
+                for (let exercise of currentWorkout.exercises) {
+                  console.log(exercise);
+                }
+                saveWorkout({
+                  workoutId: workout.id,
+                  exercises: currentWorkout.exercises,
+                });
+              }
             }}
-            className="rounded-md border border-green-800 w-full p-2 bg-green-700 hover:bg-green-900 hover:text-white cursor-pointer"
+            className="rounded-md border text-white border-emerald-800 w-full p-2 bg-emerald-800 hover:bg-emerald-900 hover:text-white cursor-pointer"
           >
             Lopeta harjoitus
           </button>

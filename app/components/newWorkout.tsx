@@ -25,8 +25,8 @@ export function CreateWorkout({
   return (
     <div className="w-full max-w-md">
       {error && (
-        <div className="border border-red-200 p-2 rounded mb-2 bg-red-100 flex justify-between">
-          <p className="text-red-700">{error.text}</p>
+        <div className=" bg-yellow-950 p-2 rounded mb-2 flex justify-between">
+          <p className="text-yellow-600">{error.text}</p>
           <svg
             onClick={() => setError(null)}
             xmlns="http://www.w3.org/2000/svg"
@@ -34,7 +34,7 @@ export function CreateWorkout({
             viewBox="0 0 24 24"
             strokeWidth={1.5}
             stroke="currentColor"
-            color="red"
+            color="var(--color-yellow-600)"
             className="size-6  cursor-pointer"
           >
             <path
@@ -48,17 +48,20 @@ export function CreateWorkout({
       <button
         hidden={formVisible}
         onClick={() => setFormVisible(!formVisible)}
-        className="border border-green-800 bg-green-600 p-2 w-full rounded hover:bg-green-700 cursor-pointer"
+        className="p-2 w-full rounded hover:bg-green-700 cursor-pointer"
       >
         Luo uusi harjoitus
       </button>
       {formVisible && (
-        <div className="p-2 border border-gray-400 rounded shadow">
-          <form onSubmit={(e) => e.preventDefault()}>
+        <div className="p-2 rounded-xl shadow bg-zinc-950 border border-zinc-900">
+          <h2 className="font-semibold text-zinc-500 tracking-wide uppercase">
+            Aloita uusi treeni
+          </h2>
+          <form className="p-2" onSubmit={(e) => e.preventDefault()}>
             <div className="flex flex-col">
               <label
                 htmlFor="workoutName"
-                className="text-gray-500 uppercase font-semibold text-xs tracking-widest "
+                className="text-zinc-600 uppercase font-semibold text-xs tracking-widest "
               >
                 Treenin nimi
               </label>
@@ -74,18 +77,18 @@ export function CreateWorkout({
                 type="text"
                 name="workoutName"
                 placeholder="esim. Työntävät"
-                className="border border-gray-400 p-2  mt-1.5 w-full rounded placeholder:text-gray-400 placeholder:text-sm placeholder:italic"
+                className="border border-zinc-700 p-2 mt-1.5 w-full rounded placeholder:text-zinc-700 placeholder:text-sm placeholder:italic text-zinc-500"
               />
             </div>
             <div className="flex flex-col">
               <label
                 htmlFor="workoutName"
-                className="text-gray-500 mt-1.5 uppercase font-semibold text-xs tracking-widest "
+                className="text-zinc-600 mt-1.5 uppercase font-semibold text-xs tracking-widest "
               >
                 Lisää liike
               </label>
 
-              <div className="flex justify-between border border-gray-400 rounded">
+              <div className="flex justify-between border border-zinc-700 rounded">
                 <select
                   onChange={(e) => {
                     if (error?.id == 2) setError(null);
@@ -101,8 +104,7 @@ export function CreateWorkout({
                     }
                   }}
                   name="exerciseName"
-                  id=""
-                  className="p-2 w-full"
+                  className="p-2 w-full text-zinc-600"
                 >
                   <option value="0">Valitse liike listasta</option>
                   {exercises.map((exercise) => (
@@ -138,7 +140,7 @@ export function CreateWorkout({
                       }));
                     }
                   }}
-                  className="p-2 bg-blue-500 text-white w-30 hover:bg-blue-600 cursor-pointer text-gray-500 "
+                  className="p-2 bg-sky-800 rounded-r w-30 hover:bg-blue-600 cursor-pointer text-zinc-100 uppercase text-sm tracking-widest"
                 >
                   Lisää
                 </button>
@@ -148,25 +150,25 @@ export function CreateWorkout({
               {workout.exercises.map((exercise) => (
                 <div
                   key={exercise.id}
-                  className="border border-gray-400 rounded shadow p-2"
+                  className="border border-zinc-700 rounded shadow p-2"
                 >
-                  <p>
+                  <p className="text-zinc-500">
                     {exercises.find((item) => item.id === exercise.id)?.name}
                   </p>
                   <table key={exercise.id} className="w-full mt-1">
                     <thead>
                       <tr>
-                        <th className="w-6 text-gray-500 uppercase tracking-wide">
+                        <th className="w-6 text-zinc-600 uppercase tracking-wide">
                           #
                         </th>
-                        <th className="w-6 text-gray-500 uppercase tracking-wide">
+                        <th className="w-6 text-zinc-600 uppercase tracking-wide">
                           Toistot
                         </th>
-                        <th className="w-6 text-gray-500 uppercase tracking-wide"></th>
-                        <th className="w-6 text-gray-500 uppercase tracking-wide">
+                        <th className="w-6 text-zinc-600 uppercase tracking-wide"></th>
+                        <th className="w-6 text-zinc-600 uppercase tracking-wide">
                           Paino
                         </th>
-                        <th className="w-6 text-gray-500 uppercase tracking-wide"></th>
+                        <th className="w-6 text-zinc-600 uppercase tracking-wide"></th>
                         <th
                           onClick={(e) => {
                             setWorkout((prevWorkout) => ({
@@ -189,7 +191,7 @@ export function CreateWorkout({
                               }),
                             }));
                           }}
-                          className="w-6 text-gray-500 uppercase tracking-wide"
+                          className="w-6 text-zinc-600 uppercase tracking-wide"
                         >
                           <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -211,11 +213,10 @@ export function CreateWorkout({
 
                     <tbody>
                       {exercise.sets.map((set) => (
-                        <tr
-                          key={set.order}
-                          className=" border-b border-gray-400"
-                        >
-                          <td className="w-6 p-2 text-center">{set.order}</td>
+                        <tr key={set.order} className="">
+                          <td className="w-6 p-2 text-center text-zinc-600">
+                            {set.order}
+                          </td>
                           <td className="w-6 p-2 text-center">
                             <input
                               onChange={(e) => {
@@ -244,10 +245,12 @@ export function CreateWorkout({
                               placeholder={String(set.reps)}
                               type="number"
                               name="setReps"
-                              className="p-2 text-center border border-gray-400 rounded w-15 bg-gray-100 [appearance:textfield]"
+                              className="p-2 text-center text-zinc-500 bg-zinc-800 rounded-lg w-15 bg-gray-100 [appearance:textfield]"
                             />
                           </td>
-                          <td className="w-6 p-2 text-center">x</td>
+                          <td className="w-6 p-2 text-center text-zinc-600">
+                            x
+                          </td>
                           <td className="w-6 p-2 text-center">
                             <input
                               onChange={(e) => {
@@ -278,10 +281,12 @@ export function CreateWorkout({
                               placeholder={String(set.weight)}
                               type="number"
                               name="setWeight"
-                              className="p-2 text-center border border-gray-400 rounded w-15 bg-gray-100 [appearance:textfield]"
+                              className="p-2 text-center text-zinc-500 bg-zinc-800 rounded-lg w-15 bg-gray-100 [appearance:textfield]"
                             />
                           </td>
-                          <td className="w-6 p-2 text-center">kg</td>
+                          <td className="w-6 p-2 text-center text-zinc-600">
+                            kg
+                          </td>
                           <td
                             onClick={() => {
                               setWorkout((prevWorkout) => ({
@@ -310,7 +315,7 @@ export function CreateWorkout({
                                 ),
                               }));
                             }}
-                            className="w-6 text-center"
+                            className="w-6 text-center text-zinc-600 cursor-pointer"
                           >
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
@@ -336,7 +341,7 @@ export function CreateWorkout({
             </div>
             <div>
               <button
-                className="border border-green-600 bg-green-600 text-white p-2 w-full mt-1.5 rounded hover:bg-green-700 cursor-pointer"
+                className="bg-emerald-700 text-white p-2 w-full mt-1.5 rounded hover:bg-emerald-800 cursor-pointer uppercase text-sm tracking-widest"
                 type="button"
                 onClick={() => {
                   if (workout.name.length == 0) {

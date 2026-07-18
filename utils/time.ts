@@ -7,3 +7,8 @@ export function formatTime(dateString: string) {
   });
   return formatted.format(dateObj);
 }
+export function calculateWorkoutDuration(startTime: string, endTime: string) {
+  const startObj = new Date(startTime);
+  const endObj = new Date(endTime);
+  return Math.round((endObj.getTime() - startObj.getTime()) / 1000 / 60);
+}

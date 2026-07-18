@@ -22,6 +22,7 @@ export async function createNewWorkout(workout: Workout) {
     "saveworkout",
     { workout: workout },
   );
-  if (workoutError) console.error(workoutError);
+  if (workoutError) return console.error(workoutError);
+  if (!workoutId) return console.error("ID JÄI MATKALLE ");
   redirect(`/workouts/${workoutId}`);
 }

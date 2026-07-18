@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { CreateWorkout } from "./components/newWorkout";
 import { createClient } from "@/utils/supabase/server";
+import { CompletedWorkouts } from "./components/completedWorkouts";
 interface Exercise {
   id: number;
   name: string;
@@ -13,8 +14,9 @@ export default async function Home() {
     .select("id,name");
   if (exercisesError) console.log("VIRHE!!!");
   return (
-    <div className="flex p-2 justify-center min-h-screen">
+    <div className="flex flex-col gap-2 p-2 items-center min-h-screen bg-neutral-950">
       <CreateWorkout exercises={(exercisesData as Exercise[]) || []} />
+      <CompletedWorkouts />
     </div>
   );
 }
