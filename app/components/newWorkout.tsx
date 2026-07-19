@@ -108,8 +108,6 @@ export function CreateWorkout({
     );
   }
   function createWorkout() {
-    console.log("LUodun harjoituksen tiedot:");
-    console.log(addedExercises);
     if (!exerciseName) setNameError(true);
     if (addedExercises.length == 0) setExerciseError(true);
     // Nimi annettu ja liikkeitä lisätty
@@ -148,7 +146,7 @@ export function CreateWorkout({
               className="text-sm uppercase text-zinc-500 tracking-wider font-semibold"
             >
               Treenin nimi
-            </label>{" "}
+            </label>
             <input
               onChange={(e) => {
                 setExerciseName(e.target.value);
@@ -192,41 +190,41 @@ export function CreateWorkout({
                 .filter((exercise) => exercise.group === showGroup)
                 .map((exercise) => (
                   <div
+                    onClick={() => {
+                      if (
+                        !addedExercises.some(
+                          (addedExercise) => addedExercise.id == exercise.id,
+                        )
+                      ) {
+                        setAddedExercises((prevAddedExercises) => [
+                          ...prevAddedExercises,
+                          {
+                            id: exercise.id,
+                            name: exercise.name,
+                            sets: [
+                              {
+                                id: crypto.randomUUID(),
+                                order: 1,
+                                reps: 0,
+                                weight: 0,
+                              },
+                            ],
+                          },
+                        ]);
+                        return setExerciseError(false);
+                      }
+                      // On jo lisätty > halutaan siis poistaa
+                      setAddedExercises((prevAddedExercises) =>
+                        prevAddedExercises.filter(
+                          (addedExercise) => addedExercise.id !== exercise.id,
+                        ),
+                      );
+                    }}
                     key={exercise.id}
-                    className="p-2 border-b border-zinc-800 rounded text-zinc-500 uppercase text-sm flex gap-2 items-center"
+                    className="p-2 border-b border-zinc-800 rounded text-zinc-500 uppercase text-sm flex gap-2 items-center cursor-pointer"
                   >
                     <div
-                      onClick={() => {
-                        if (
-                          !addedExercises.some(
-                            (addedExercise) => addedExercise.id == exercise.id,
-                          )
-                        ) {
-                          setAddedExercises((prevAddedExercises) => [
-                            ...prevAddedExercises,
-                            {
-                              id: exercise.id,
-                              name: exercise.name,
-                              sets: [
-                                {
-                                  id: crypto.randomUUID(),
-                                  order: 1,
-                                  reps: 0,
-                                  weight: 0,
-                                },
-                              ],
-                            },
-                          ]);
-                          return setExerciseError(false);
-                        }
-                        // On jo lisätty > halutaan siis poistaa
-                        setAddedExercises((prevAddedExercises) =>
-                          prevAddedExercises.filter(
-                            (addedExercise) => addedExercise.id !== exercise.id,
-                          ),
-                        );
-                      }}
-                      className={`border border-zinc-800 w-4 h-4 rounded cursor-pointer ${addedExercises.some((addedExercise) => addedExercise.id == exercise.id) && "bg-emerald-800"}`}
+                      className={`border border-zinc-800 w-4 h-4 rounded  ${addedExercises.some((addedExercise) => addedExercise.id == exercise.id) && "bg-emerald-800"}`}
                     ></div>
                     <p className="">{exercise.name}</p>
                   </div>
@@ -237,16 +235,16 @@ export function CreateWorkout({
                 addedExercises.map((addedExercise) => (
                   <div
                     key={addedExercise.id}
-                    className="border border-zinc-900 p-2 rounded bg-zinc-900/60"
+                    className="border border-zinc-900 p-2 rounded-lg bg-zinc-900/80"
                   >
                     <p className="text-zinc-200">{addedExercise.name}</p>
                     <div>
                       <table className="w-full">
-                        <thead className="border-b border-zinc-800 text-zinc-500">
+                        <thead className="border-b border-zinc-800 text-zinc-500 text-sm ">
                           <tr>
                             <th className="w-12 text-center">#</th>
-                            <th className="">Toistot</th>
-                            <th className="">Painot (kg)</th>
+                            <th className="whitespace-nowrap">Toistot</th>
+                            <th className="whitespace-nowrap">Painot (kg)</th>
                             <th
                               className="w-4 p-2 cursor-pointer hover:text-emerald-700"
                               onClick={() => addSet(addedExercise.id)}

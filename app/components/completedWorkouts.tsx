@@ -47,7 +47,7 @@ export async function CompletedWorkouts() {
   const workouts = data as unknown as WorkoutsDataType[];
   return (
     <div className="rounded-xl shadow bg-zinc-950 border border-zinc-900 w-full max-w-md p-2">
-      <h2 className="font-semibold text-amber-500 tracking-wide uppercase">
+      <h2 className="font-semibold text-amber-500 tracking-wide uppercase mb-1.5">
         Suoritetut treenit
       </h2>
       <div className="flex flex-col gap-2">

@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { calculateWorkoutDuration, formatTime } from "@/utils/time";
+import { redirect } from "next/navigation";
 
 interface WorkoutsDataType {
   id: number;
@@ -26,7 +27,7 @@ export function CompletedWorkout(workout: WorkoutsDataType) {
         {workout && (
           <div
             key={workout.id}
-            className="flex flex-col gap-1 rounded-md bg-zinc-900"
+            className={`flex flex-col gap-1 rounded-md bg-zinc-900/60 ${!workout.endTime && "border border-amber-900/60"}`}
           >
             <div
               onClick={() => setShowExercises(!showExercises)}
@@ -38,8 +39,8 @@ export function CompletedWorkout(workout: WorkoutsDataType) {
                   {formatTime(workout.startTime)}
                 </p>
               </div>
-              <div className="flex justify-center h-full p-1 rounded-lg bg-emerald-700 w-auto">
-                {workout.endTime && (
+              {workout.endTime ? (
+                <div className="flex justify-center h-full p-1 rounded-lg bg-emerald-700 w-auto">
                   <span className="flex items-center gap-1 text-emerald-50 text-xs font-semibold">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
@@ -61,12 +62,21 @@ export function CompletedWorkout(workout: WorkoutsDataType) {
                     )}{" "}
                     min
                   </span>
-                )}
-              </div>
+                </div>
+              ) : (
+                <div className="bg-yellow-950/60 rounded flex flex-col items-center justify-center h-full text-zinc-200">
+                  <button
+                    onClick={() => redirect(`/workouts/${workout.id}`)}
+                    className="p-2 cursor-pointer hover:bg-yellow-950 rounded"
+                  >
+                    Jatka treeniä
+                  </button>
+                </div>
+              )}
             </div>
             <div
               hidden={!showExercises}
-              className="flex flex-col gap-4 p-2 bg-zinc-950/90"
+              className="flex flex-col gap-4 p-2 bg-zinc-950"
             >
               {workout.WorkoutExercises.map((exercise) => (
                 <div key={exercise.id}>
