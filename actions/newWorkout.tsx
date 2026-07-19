@@ -8,7 +8,9 @@ interface Workout {
   name: string;
   exercises: {
     id: number;
+    name: string;
     sets: {
+      id: string;
       order: number;
       reps: number;
       weight: number;

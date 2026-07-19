@@ -13,364 +13,319 @@ interface Workout {
     }[];
   }[];
 }
+interface Exercises {
+  id: number;
+  name: string;
+  sets: {
+    id: string;
+    order: number;
+    reps: number;
+    weight: number;
+  }[];
+}
 export function CreateWorkout({
   exercises,
 }: {
-  exercises: { id: number; name: string }[];
+  exercises: { id: number; name: string; group: string }[];
 }) {
-  const [newExercise, setNewExercise] = useState<number>(0);
-  const [error, setError] = useState<{ id: number; text: string } | null>();
-  const [formVisible, setFormVisible] = useState(false);
-  const [workout, setWorkout] = useState<Workout>({ name: "", exercises: [] });
+  const [exerciseName, setExerciseName] = useState<string | null>(null);
+  const [addedExercises, setAddedExercises] = useState<Exercises[]>([]);
+  const [showGroup, setShowGroup] = useState<string>("Kädet");
+  const [showForm, setShowForm] = useState(false);
+  const [nameError, setNameError] = useState(false);
+  const [exerciseError, setExerciseError] = useState(false);
+  const exerciseGroups = [
+    ...new Set(exercises.map((exercise) => exercise.group)),
+  ];
+  function addSet(exerciseId: number) {
+    setAddedExercises((prevAddedExercises) =>
+      prevAddedExercises.map((addedExercise) => {
+        if (addedExercise.id !== exerciseId) {
+          return addedExercise;
+        }
+        return {
+          ...addedExercise,
+          sets: [
+            ...addedExercise.sets,
+            {
+              id: crypto.randomUUID(),
+              order: addedExercise.sets.length + 1,
+              reps: 0,
+              weight: 0,
+            },
+          ],
+        };
+      }),
+    );
+  }
+  function updateSet(
+    exerciseId: number,
+    setId: string,
+    value: number,
+    field: string,
+  ) {
+    setAddedExercises((prevAddedExercises) =>
+      prevAddedExercises.map((addedExercise) => {
+        if (addedExercise.id !== exerciseId) {
+          return addedExercise;
+        }
+        return {
+          ...addedExercise,
+          sets: addedExercise.sets.map((set) => {
+            if (set.id !== setId) {
+              return set;
+            }
+            return {
+              ...set,
+              [field]: value,
+            };
+          }),
+        };
+      }),
+    );
+  }
+  function deleteSet(exerciseId: number, setId: string) {
+    setAddedExercises((prevAddedExercises) =>
+      prevAddedExercises
+        .map((exercise) => {
+          if (exercise.id !== exerciseId) {
+            return exercise;
+          }
+          if (exercise.sets.length > 1) {
+            return {
+              ...exercise,
+              sets: exercise.sets
+                .filter((set) => set.id !== setId)
+                .map((set, index) => ({
+                  ...set,
+                  order: index + 1,
+                })),
+            };
+          }
+          return null;
+        })
+        .filter((exercise) => exercise !== null),
+    );
+  }
+  function createWorkout() {
+    console.log("LUodun harjoituksen tiedot:");
+    console.log(addedExercises);
+    if (!exerciseName) setNameError(true);
+    if (addedExercises.length == 0) setExerciseError(true);
+    // Nimi annettu ja liikkeitä lisätty
+    if (exerciseName && addedExercises.length > 0) {
+      createNewWorkout({
+        name: exerciseName,
+        exercises: addedExercises,
+      });
+    }
+  }
   return (
-    <div className="w-full max-w-md">
-      {error && (
-        <div className=" bg-yellow-950 p-2 rounded mb-2 flex justify-between">
-          <p className="text-yellow-600">{error.text}</p>
-          <svg
-            onClick={() => setError(null)}
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth={1.5}
-            stroke="currentColor"
-            color="var(--color-yellow-600)"
-            className="size-6  cursor-pointer"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-            />
-          </svg>
-        </div>
-      )}
+    <div className="border border-zinc-900 w-full max-w-md text-zinc-200 rounded-md">
       <button
-        hidden={formVisible}
-        onClick={() => setFormVisible(!formVisible)}
-        className="p-2 w-full rounded hover:bg-green-700 cursor-pointer bg-emerald-800 text-zinc-50 uppercase tracking-wide text-sm"
+        onClick={() => setShowForm(!showForm)}
+        hidden={showForm}
+        className="p-2 w-full bg-emerald-800 rounded p-2 cursor-pointer hover:bg-emerald-900 uppercase tracking-wide font-semibold text-md"
       >
-        Aloita uusi treeni
+        Luo uusi treeni
       </button>
-      {formVisible && (
-        <div className="p-2 rounded-xl shadow bg-zinc-950 border border-zinc-900">
-          <h2 className="font-semibold text-amber-500 tracking-wide uppercase">
-            Aloita uusi treeni
-          </h2>
-          <form className="p-2" onSubmit={(e) => e.preventDefault()}>
-            <div className="flex flex-col">
-              <label
-                htmlFor="workoutName"
-                className="text-zinc-600 uppercase font-semibold text-xs tracking-widest "
-              >
-                Treenin nimi
-              </label>
-
-              <input
-                onBlur={(e) => {
-                  if (error?.id == 1) setError(null);
-                  setWorkout((prevWorkout) => ({
-                    ...prevWorkout,
-                    name: e.target.value,
-                  }));
-                }}
-                type="text"
-                name="workoutName"
-                placeholder="esim. Työntävät"
-                className="border border-zinc-700 p-2 mt-1.5 w-full rounded placeholder:text-zinc-700 placeholder:text-sm placeholder:italic text-zinc-500"
-              />
-            </div>
-            <div className="flex flex-col">
-              <label
-                htmlFor="workoutName"
-                className="text-zinc-600 mt-1.5 uppercase font-semibold text-xs tracking-widest "
-              >
-                Lisää liike
-              </label>
-
-              <div className="flex justify-between border border-zinc-700 rounded">
-                <select
-                  value={newExercise}
-                  onChange={(e) => {
-                    if (error?.id == 2) setError(null);
-                    if (
-                      !workout.exercises.some(
-                        (exercise) => exercise.id === Number(e.target.value),
-                      )
-                    ) {
-                      if (e.target.value !== "0") {
-                        return setNewExercise(Number(e.target.value));
-                      }
-                      setNewExercise(0);
-                    }
-                  }}
-                  name="exerciseName"
-                  className="p-2 w-full text-zinc-600
-"
-                >
-                  <option value="0">Valitse liike listasta</option>
-                  {exercises.map((exercise) => (
-                    <option
-                      key={exercise.id}
-                      value={exercise.id}
-                      className="bg-zinc-200"
-                    >
-                      {exercise.name}
-                    </option>
-                  ))}
-                </select>
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (newExercise) {
-                      if (
-                        workout.exercises.some(
-                          (exercise) => exercise.id === newExercise,
-                        )
-                      ) {
-                        return setError({
-                          id: 3,
-                          text: "Valittu liike on jo lisätty harjoitukseen",
-                        });
-                      }
-                      setWorkout((prevWorkout) => ({
-                        ...prevWorkout,
-                        exercises: [
-                          ...prevWorkout.exercises,
-                          {
-                            id: Number(newExercise),
-                            sets: [{ order: 1, reps: 0, weight: 0 }],
-                          },
-                        ],
-                      }));
-                    }
-                    setNewExercise(0);
-                  }}
-                  className="p-2 bg-sky-800 rounded-r w-30 hover:bg-blue-600 cursor-pointer text-zinc-100 uppercase text-sm tracking-widest"
-                >
-                  Lisää
-                </button>
+      <div hidden={!showForm} className="p-2">
+        <div className="flex justify-between">
+          <h3 className="text-yellow-600 uppercase font-semibold tracking-wide mb-1.5">
+            Luo uusi treeni
+          </h3>
+          <button
+            onClick={() => createWorkout()}
+            className="bg-emerald-900 p-2 rounded hover:bg-emerald-950 cursor-pointer mt-1.5 w-50"
+          >
+            Aloita treeni
+          </button>
+        </div>
+        <div>
+          <div>
+            <label
+              htmlFor="workoutName"
+              className="text-sm uppercase text-zinc-500 tracking-wider font-semibold"
+            >
+              Treenin nimi
+            </label>{" "}
+            <input
+              onChange={(e) => {
+                setExerciseName(e.target.value);
+                setNameError(false);
+              }}
+              type="text"
+              name="workoutName"
+              placeholder="esim. Työntävät"
+              className="p-2 border border-zinc-800 w-full rounded"
+            />
+            {nameError && (
+              <div className="text-red-900 font-semibold text-xs uppercase tracking-wide">
+                Treenillä on oltava nimi
               </div>
-            </div>
-            <div className="flex flex-col gap-2 pt-2">
-              {workout.exercises.map((exercise) => (
+            )}
+          </div>
+          <div className="">
+            <label className="text-sm uppercase text-zinc-500 tracking-wider font-semibold">
+              Liikkeet
+            </label>
+            {exerciseError && (
+              <div className="text-red-900 font-semibold text-xs uppercase tracking-wide pb-2">
+                Vähintään yksi liike on lisättävä
+              </div>
+            )}
+            <div className="w-full flex gap-2 overflow-x-auto scrollbar-none">
+              {exerciseGroups.map((group) => (
                 <div
-                  key={exercise.id}
-                  className="border border-zinc-700 rounded shadow p-2"
+                  onClick={() => {
+                    setShowGroup(group);
+                  }}
+                  key={group}
+                  className={`p-2 text-xs border border-zinc-800 rounded-md cursor-pointer ${showGroup == group && "bg-zinc-800"}`}
                 >
-                  <p className="text-zinc-500">
-                    {exercises.find((item) => item.id === exercise.id)?.name}
-                  </p>
-                  <table key={exercise.id} className="w-full mt-1">
-                    <thead>
-                      <tr>
-                        <th className="w-6 text-zinc-600 uppercase tracking-wide">
-                          #
-                        </th>
-                        <th className="w-6 text-zinc-600 uppercase tracking-wide">
-                          Toistot
-                        </th>
-                        <th className="w-6 text-zinc-600 uppercase tracking-wide"></th>
-                        <th className="w-6 text-zinc-600 uppercase tracking-wide">
-                          Paino
-                        </th>
-                        <th className="w-6 text-zinc-600 uppercase tracking-wide"></th>
-                        <th
-                          onClick={(e) => {
-                            setWorkout((prevWorkout) => ({
-                              ...prevWorkout,
-                              exercises: prevWorkout.exercises.map((item) => {
-                                if (item.id === exercise.id) {
-                                  return {
-                                    ...item,
-                                    sets: [
-                                      ...item.sets,
-                                      {
-                                        order: item.sets.length + 1,
-                                        reps: 0,
-                                        weight: 0,
-                                      },
-                                    ],
-                                  };
-                                }
-                                return item;
-                              }),
-                            }));
-                          }}
-                          className="w-6 text-zinc-600 uppercase tracking-wide"
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            strokeWidth={1.5}
-                            stroke="currentColor"
-                            className="size-6"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              d="M12 4.5v15m7.5-7.5h-15"
-                            />
-                          </svg>
-                        </th>
-                      </tr>
-                    </thead>
-
-                    <tbody>
-                      {exercise.sets.map((set) => (
-                        <tr key={set.order} className="">
-                          <td className="w-6 p-2 text-center text-zinc-600">
-                            {set.order}
-                          </td>
-                          <td className="w-6 p-2 text-center">
-                            <input
-                              onChange={(e) => {
-                                setWorkout((prevWorkout) => ({
-                                  ...prevWorkout,
-                                  exercises: prevWorkout.exercises.map(
-                                    (item) => {
-                                      if (item.id === exercise.id) {
-                                        return {
-                                          ...item,
-                                          sets: item.sets.map((s) =>
-                                            s.order === set.order
-                                              ? {
-                                                  ...s,
-                                                  reps: Number(e.target.value),
-                                                }
-                                              : s,
-                                          ),
-                                        };
-                                      }
-                                      return item;
-                                    },
-                                  ),
-                                }));
-                              }}
-                              placeholder={String(set.reps)}
-                              type="number"
-                              name="setReps"
-                              className="p-2 text-center text-zinc-500 bg-zinc-800 rounded-lg w-15 bg-gray-100 [appearance:textfield]"
-                            />
-                          </td>
-                          <td className="w-6 p-2 text-center text-zinc-600">
-                            x
-                          </td>
-                          <td className="w-6 p-2 text-center">
-                            <input
-                              onChange={(e) => {
-                                setWorkout((prevWorkout) => ({
-                                  ...prevWorkout,
-                                  exercises: prevWorkout.exercises.map(
-                                    (item) => {
-                                      if (item.id === exercise.id) {
-                                        return {
-                                          ...item,
-                                          sets: item.sets.map((s) =>
-                                            s.order === set.order
-                                              ? {
-                                                  ...s,
-                                                  weight: Number(
-                                                    e.target.value,
-                                                  ),
-                                                }
-                                              : s,
-                                          ),
-                                        };
-                                      }
-                                      return item;
-                                    },
-                                  ),
-                                }));
-                              }}
-                              placeholder={String(set.weight)}
-                              type="number"
-                              name="setWeight"
-                              className="p-2 text-center text-zinc-500 bg-zinc-800 rounded-lg w-15 bg-gray-100 [appearance:textfield]"
-                            />
-                          </td>
-                          <td className="w-6 p-2 text-center text-zinc-600">
-                            kg
-                          </td>
-                          <td
-                            onClick={() => {
-                              setWorkout((prevWorkout) => ({
-                                ...prevWorkout,
-                                exercises: prevWorkout.exercises.flatMap(
-                                  (item) => {
-                                    if (item.id === exercise.id) {
-                                      const updatedSets = item.sets.filter(
-                                        (s) => s.order !== set?.order,
-                                      );
-                                      if (updatedSets.length === 0) {
-                                        return [];
-                                      }
-                                      return [
-                                        {
-                                          ...item,
-                                          sets: updatedSets.map((s, index) => ({
-                                            ...s,
-                                            order: index + 1,
-                                          })),
-                                        },
-                                      ];
-                                    }
-                                    return [item];
-                                  },
-                                ),
-                              }));
-                            }}
-                            className="w-6 text-center text-zinc-600 cursor-pointer"
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              strokeWidth={1.5}
-                              stroke="currentColor"
-                              className="size-5"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0"
-                              />
-                            </svg>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                  {group}
                 </div>
               ))}
             </div>
-            <div>
-              <button
-                className="bg-emerald-700 text-white p-2 w-full mt-1.5 rounded hover:bg-emerald-800 cursor-pointer uppercase text-sm tracking-widest"
-                type="button"
-                onClick={() => {
-                  if (workout.name.length == 0) {
-                    return setError({
-                      id: 1,
-                      text: "Harjoituksella on oltava nimi",
-                    });
-                  }
-                  if (workout.exercises.length == 0) {
-                    return setError({
-                      id: 2,
-                      text: "Lisää harjoitukseen vähintään yksi liike",
-                    });
-                  }
-                  createNewWorkout(workout);
-                }}
-              >
-                Aloita harjoitus
-              </button>
+            <div className="mb-2 flex flex-col gap-1 mt-1.5 max-h-60 overflow-y-auto border border-zinc-800 rounded">
+              {exercises
+                .filter((exercise) => exercise.group === showGroup)
+                .map((exercise) => (
+                  <div
+                    key={exercise.id}
+                    className="p-2 border-b border-zinc-800 rounded text-zinc-500 uppercase text-sm flex gap-2 items-center"
+                  >
+                    <div
+                      onClick={() => {
+                        if (
+                          !addedExercises.some(
+                            (addedExercise) => addedExercise.id == exercise.id,
+                          )
+                        ) {
+                          setAddedExercises((prevAddedExercises) => [
+                            ...prevAddedExercises,
+                            {
+                              id: exercise.id,
+                              name: exercise.name,
+                              sets: [
+                                {
+                                  id: crypto.randomUUID(),
+                                  order: 1,
+                                  reps: 0,
+                                  weight: 0,
+                                },
+                              ],
+                            },
+                          ]);
+                          return setExerciseError(false);
+                        }
+                        // On jo lisätty > halutaan siis poistaa
+                        setAddedExercises((prevAddedExercises) =>
+                          prevAddedExercises.filter(
+                            (addedExercise) => addedExercise.id !== exercise.id,
+                          ),
+                        );
+                      }}
+                      className={`border border-zinc-800 w-4 h-4 rounded cursor-pointer ${addedExercises.some((addedExercise) => addedExercise.id == exercise.id) && "bg-emerald-800"}`}
+                    ></div>
+                    <p className="">{exercise.name}</p>
+                  </div>
+                ))}
             </div>
-          </form>
+            <div className="flex flex-col gap-2 ">
+              {addedExercises &&
+                addedExercises.map((addedExercise) => (
+                  <div
+                    key={addedExercise.id}
+                    className="border border-zinc-900 p-2 rounded bg-zinc-900/60"
+                  >
+                    <p className="text-zinc-200">{addedExercise.name}</p>
+                    <div>
+                      <table className="w-full">
+                        <thead className="border-b border-zinc-800 text-zinc-500">
+                          <tr>
+                            <th className="w-12 text-center">#</th>
+                            <th className="">Toistot</th>
+                            <th className="">Painot (kg)</th>
+                            <th
+                              className="w-4 p-2 cursor-pointer hover:text-emerald-700"
+                              onClick={() => addSet(addedExercise.id)}
+                            >
+                              <p className="text-xs w-20 text-zinc-200 p-1 bg-emerald-900 rounded-lg hover:bg-emerald-950">
+                                Lisää sarja
+                              </p>
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {addedExercise.sets.map((set, index) => (
+                            <tr key={set.id}>
+                              <td className="text-center py-2.5">
+                                {index + 1}
+                              </td>
+                              <td className="text-center py-2.5">
+                                <input
+                                  onChange={(e) =>
+                                    updateSet(
+                                      addedExercise.id,
+                                      set.id,
+                                      Number(e.target.value),
+                                      "reps",
+                                    )
+                                  }
+                                  className="[appearance:textfield] p-1 text-center border border-zinc-800 w-15 rounded-lg "
+                                  type="number"
+                                  name="workoutReps"
+                                  placeholder={String(set.reps)}
+                                />
+                              </td>
+                              <td className="text-center py-2.5">
+                                <input
+                                  onChange={(e) =>
+                                    updateSet(
+                                      addedExercise.id,
+                                      set.id,
+                                      Number(e.target.value),
+                                      "weight",
+                                    )
+                                  }
+                                  className="[appearance:textfield] p-1 text-center border border-zinc-800 w-15 rounded-lg "
+                                  type="number"
+                                  name="workoutWeight"
+                                  placeholder={String(set.weight)}
+                                />
+                              </td>
+                              <td
+                                onClick={() =>
+                                  deleteSet(addedExercise.id, set.id)
+                                }
+                              >
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  strokeWidth={1.5}
+                                  stroke="currentColor"
+                                  className="size-4 mx-auto hover:text-red-800 cursor-pointer"
+                                >
+                                  <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    d="M5 12h14"
+                                  />
+                                </svg>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                ))}
+            </div>
+          </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }

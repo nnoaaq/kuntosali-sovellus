@@ -51,7 +51,7 @@ export function ActiveWorkout({ workout }: { workout: Workout }) {
     <div className="border h-full w-100 border-zinc-800 rounded flex flex-col gap-2 bg-zinc-900">
       <div className="border-b border-zinc-700 p-2 flex justify-between">
         <div>
-          <h3 className="text-xl text-zinc-400">{workout.name}</h3>
+          <h3 className="text-xl text-yellow-500">{workout.name}</h3>
           <p className="text-sm text-zinc-600">
             {formatTime(workout.startTime)}
           </p>
@@ -65,7 +65,7 @@ export function ActiveWorkout({ workout }: { workout: Workout }) {
               className="border border-zinc-800 rounded p-2"
               key={workoutExercise.id}
             >
-              <p className="text-zinc-500">{workoutExercise.Exercises.name}</p>
+              <p className="text-zinc-400">{workoutExercise.Exercises.name}</p>
               <div>
                 {errors &&
                   errors.map(
