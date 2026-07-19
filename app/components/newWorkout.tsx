@@ -18,9 +18,9 @@ export function CreateWorkout({
 }: {
   exercises: { id: number; name: string }[];
 }) {
-  const [newExercise, setNewExercise] = useState<number | null>(null);
+  const [newExercise, setNewExercise] = useState<number>(0);
   const [error, setError] = useState<{ id: number; text: string } | null>();
-  const [formVisible, setFormVisible] = useState(true);
+  const [formVisible, setFormVisible] = useState(false);
   const [workout, setWorkout] = useState<Workout>({ name: "", exercises: [] });
   return (
     <div className="w-full max-w-md">
@@ -48,13 +48,13 @@ export function CreateWorkout({
       <button
         hidden={formVisible}
         onClick={() => setFormVisible(!formVisible)}
-        className="p-2 w-full rounded hover:bg-green-700 cursor-pointer"
+        className="p-2 w-full rounded hover:bg-green-700 cursor-pointer bg-emerald-800 text-zinc-50 uppercase tracking-wide text-sm"
       >
-        Luo uusi harjoitus
+        Aloita uusi treeni
       </button>
       {formVisible && (
         <div className="p-2 rounded-xl shadow bg-zinc-950 border border-zinc-900">
-          <h2 className="font-semibold text-zinc-500 tracking-wide uppercase">
+          <h2 className="font-semibold text-amber-500 tracking-wide uppercase">
             Aloita uusi treeni
           </h2>
           <form className="p-2" onSubmit={(e) => e.preventDefault()}>
@@ -90,6 +90,7 @@ export function CreateWorkout({
 
               <div className="flex justify-between border border-zinc-700 rounded">
                 <select
+                  value={newExercise}
                   onChange={(e) => {
                     if (error?.id == 2) setError(null);
                     if (
@@ -100,15 +101,20 @@ export function CreateWorkout({
                       if (e.target.value !== "0") {
                         return setNewExercise(Number(e.target.value));
                       }
-                      setNewExercise(null);
+                      setNewExercise(0);
                     }
                   }}
                   name="exerciseName"
-                  className="p-2 w-full text-zinc-600"
+                  className="p-2 w-full text-zinc-600
+"
                 >
                   <option value="0">Valitse liike listasta</option>
                   {exercises.map((exercise) => (
-                    <option key={exercise.id} value={exercise.id}>
+                    <option
+                      key={exercise.id}
+                      value={exercise.id}
+                      className="bg-zinc-200"
+                    >
                       {exercise.name}
                     </option>
                   ))}
@@ -116,7 +122,6 @@ export function CreateWorkout({
                 <button
                   type="button"
                   onClick={() => {
-                    console.log(newExercise);
                     if (newExercise) {
                       if (
                         workout.exercises.some(
@@ -139,6 +144,7 @@ export function CreateWorkout({
                         ],
                       }));
                     }
+                    setNewExercise(0);
                   }}
                   className="p-2 bg-sky-800 rounded-r w-30 hover:bg-blue-600 cursor-pointer text-zinc-100 uppercase text-sm tracking-widest"
                 >
