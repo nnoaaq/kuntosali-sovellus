@@ -4,7 +4,6 @@ import { saveWorkout } from "@/actions/saveWorkout";
 import { formatTime } from "@/utils/time";
 import { useEffect, useState } from "react";
 import { WorkoutDuration } from "./workouDuration";
-import { error } from "next/dist/build/output/log";
 interface Workout {
   id: number;
   name: string;
@@ -180,33 +179,26 @@ export function ActiveWorkout({ workout }: { workout: Workout }) {
                   Keskeneräisiä sarjoja
                 </p>
               )}
-            <table className="w-full">
+            <table className="w-full border-separate border-spacing-y-1.5">
               <thead className="border-b border-zinc-800 text-zinc-500 text-sm ">
                 <tr>
                   <th></th>
                   <th className="w-12 text-center">#</th>
                   <th className="whitespace-nowrap">Toistot</th>
                   <th className="whitespace-nowrap">Painot (kg)</th>
-                  <th
-                    onClick={() => addSet(workoutExercise.id)}
-                    className="w-4 p-2 cursor-pointer hover:text-emerald-700"
-                  >
-                    <p className="text-xs w-20 text-zinc-200 p-1 bg-emerald-900 rounded-lg hover:bg-emerald-950">
-                      Lisää sarja
-                    </p>
-                  </th>
                 </tr>
               </thead>
               <tbody>
                 {workoutExercise.WorkoutTemplateSets.map((set, index) => (
                   <tr key={set.id}>
                     <td
+                      className={`pl-3 sm:pl-0 rounded-l-2xl ${set.finished ? "bg-emerald-800/10" : "bg-zinc-900"}`}
                       onClick={() =>
                         markSetCompleted(workoutExercise.id, set.id)
                       }
                     >
                       <svg
-                        className={`w-5 h-5 mx-auto text-emerald-800 hover:bg-emerald-800 rounded-full cursor-pointer ${set.finished && "bg-emerald-800"}`}
+                        className={`w-6 h-6 mx-auto text-emerald-800 hover:bg-emerald-800 rounded-full cursor-pointer ${set.finished && "bg-emerald-800"}`}
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
@@ -215,8 +207,14 @@ export function ActiveWorkout({ workout }: { workout: Workout }) {
                         <circle cx="12" cy="12" r="10" />
                       </svg>
                     </td>
-                    <td className="text-center py-2.5">{index + 1}</td>
-                    <td className="text-center py-2.5">
+                    <td
+                      className={`text-center py-2.5 ${set.finished ? "bg-emerald-800/10 " : "bg-zinc-900"}`}
+                    >
+                      {index + 1}
+                    </td>
+                    <td
+                      className={`text-center py-2.5 ${set.finished ? "bg-emerald-800/10 " : "bg-zinc-900"}`}
+                    >
                       <input
                         onChange={(e) =>
                           updateValue(
@@ -226,13 +224,16 @@ export function ActiveWorkout({ workout }: { workout: Workout }) {
                             "reps",
                           )
                         }
+                        onFocus={(e) => e.target.select()}
                         className="[appearance:textfield] p-1 text-center border border-zinc-800 w-15 rounded-lg "
                         type="number"
                         name="workoutReps"
                         placeholder={String(set.reps)}
                       />
                     </td>
-                    <td className="text-center py-2.5">
+                    <td
+                      className={`text-center py-2.5  ${set.finished ? "bg-emerald-800/10 " : "bg-zinc-900"}`}
+                    >
                       <input
                         onChange={(e) =>
                           updateValue(
@@ -242,13 +243,17 @@ export function ActiveWorkout({ workout }: { workout: Workout }) {
                             "weight",
                           )
                         }
+                        onFocus={(e) => e.target.select()}
                         className="[appearance:textfield] p-1 text-center border border-zinc-800 w-15 rounded-lg "
                         type="number"
                         name="workoutWeight"
                         placeholder={String(set.weight)}
                       />
                     </td>
-                    <td onClick={() => removeSet(workoutExercise.id, set.id)}>
+                    <td
+                      className={`pr-3 sm:pr-1 text-center py-2.5 rounded-r-2xl ${set.finished ? "bg-emerald-800/10" : "bg-zinc-900"}`}
+                      onClick={() => removeSet(workoutExercise.id, set.id)}
+                    >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"
@@ -268,6 +273,12 @@ export function ActiveWorkout({ workout }: { workout: Workout }) {
                 ))}
               </tbody>
             </table>
+            <button
+              className="p-2 bg-zinc-900 w-full rounded-full text-md font-zinc-400 cursor-pointer hover:bg-zinc-900/60"
+              onClick={() => addSet(workoutExercise.id)}
+            >
+              + Lisää sarja
+            </button>
           </div>
         ))}
         <button

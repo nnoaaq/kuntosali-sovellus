@@ -1,6 +1,7 @@
 import { ActiveWorkout } from "@/app/components/logWorkout";
 import { createClient } from "@/utils/supabase/server";
 import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 interface Workout {
   id: number;
   name: string;
@@ -54,7 +55,7 @@ export default async function Home({
     .eq("id", paramsData.id)
     .single()) as { data: Workout; error: any };
   if (workoutError) console.error(workoutError);
-
+  if (workoutData.endTime) redirect("/"); // jo kirjattu valmiiksi...
   return (
     <div className="flex p-2 justify-center min-h-screen bg-zinc-950">
       <ActiveWorkout workout={workoutData} />
