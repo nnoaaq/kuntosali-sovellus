@@ -33,7 +33,7 @@ export function CompletedWorkout(workout: WorkoutsDataType) {
               onClick={() => setShowExercises(!showExercises)}
               className="p-2 pb-0 flex justify-between"
             >
-              <div className="w-2/3">
+              <div className="w-2/3 cursor-pointer">
                 <p className="text-xl text-amber-400">{workout.name}</p>
                 <p className="text-zinc-600 tracking-widest text-sm pb-2">
                   {formatTime(workout.startTime)}

@@ -4,6 +4,7 @@ import { saveWorkout } from "@/actions/saveWorkout";
 import { formatTime } from "@/utils/time";
 import { useEffect, useState } from "react";
 import { WorkoutDuration } from "./workouDuration";
+import { error } from "next/dist/build/output/log";
 interface Workout {
   id: number;
   name: string;
@@ -26,6 +27,9 @@ interface Workout {
   };
 }
 export function ActiveWorkout({ workout }: { workout: Workout }) {
+  const [errors, setErrors] = useState<{ exercise: number; text: string }[]>(
+    [],
+  );
   const [workoutExercises, setWorkoutExercises] = useState(
     workout.WorkoutTemplates.WorkoutTemplateExercises,
   );
@@ -51,6 +55,102 @@ export function ActiveWorkout({ workout }: { workout: Workout }) {
       }),
     );
   }
+  function removeSet(exerciseId: number, setId: number) {
+    setWorkoutExercises((prevWorkoutExercises) =>
+      prevWorkoutExercises
+        .map((exercise) => {
+          if (exercise.id !== exerciseId) {
+            return exercise;
+          }
+          if (exercise.WorkoutTemplateSets.length > 1) {
+            return {
+              ...exercise,
+              WorkoutTemplateSets: exercise.WorkoutTemplateSets.filter(
+                (set) => set.id !== setId,
+              ).map((set, index) => ({
+                ...set,
+                order: index + 1,
+              })),
+            };
+          }
+          return null;
+        })
+        .filter((exercise) => exercise !== null),
+    );
+  }
+  function updateValue(
+    newValue: number,
+    exerciseId: number,
+    setId: number,
+    field: string,
+  ) {
+    setWorkoutExercises((prevWorkoutExercises) => {
+      return prevWorkoutExercises.map((exercise) => {
+        if (exercise.id !== exerciseId) return exercise;
+        return {
+          ...exercise,
+          WorkoutTemplateSets: exercise.WorkoutTemplateSets.map((set) => {
+            if (set.id === setId) {
+              return {
+                ...set,
+                [field]: newValue,
+              };
+            }
+            return set;
+          }),
+        };
+      });
+    });
+  }
+  function markSetCompleted(exerciseId: number, setId: number) {
+    console.log(exerciseId);
+    const updatedExercises = workoutExercises.map((exercise) => {
+      if (exercise.id !== exerciseId) return exercise;
+      return {
+        ...exercise,
+        WorkoutTemplateSets: exercise.WorkoutTemplateSets.map((set) => {
+          if (set.id !== setId) return set;
+          return { ...set, finished: !set.finished };
+        }),
+      };
+    });
+    setWorkoutExercises(updatedExercises);
+    updatedExercises.forEach((exercise) => {
+      if (exercise.id !== exerciseId) return;
+      const setsUnfinished = exercise.WorkoutTemplateSets.some(
+        (set) => !set.finished,
+      );
+      if (!setsUnfinished) {
+        // poistetaan mahdollinen virhe
+        setErrors((prevErrors) =>
+          prevErrors.filter((error) => error.exercise !== exerciseId),
+        );
+      }
+    });
+  }
+  function finishWorkout() {
+    const createdErrors: { exercise: number; text: string }[] = [];
+    // Tarkistetaan onko kaikki setit merkattu suoritetuksi
+    workoutExercises.forEach((exercise) => {
+      const setsUnfinished = exercise.WorkoutTemplateSets.some(
+        (set) => !set.finished,
+      );
+      if (setsUnfinished)
+        createdErrors.push({
+          exercise: exercise.id,
+          text: "Keskeneräisiä sarjoja",
+        });
+    });
+    // Päivitetään näkymä
+    setErrors(createdErrors);
+    if (createdErrors.length === 0) {
+      // Kaikki setit merkitty tehdyiksi
+      saveWorkout({
+        workoutId: workout.id,
+        exercises: workoutExercises,
+      });
+    }
+  }
   if (!workout) return "ei workouttia";
   return (
     <div className="border border-zinc-800 w-full max-w-md rounded bg-zinc-950 text-zinc-200">
@@ -74,9 +174,16 @@ export function ActiveWorkout({ workout }: { workout: Workout }) {
             <p className="text-sm font-semibold text-zinc-400 uppercase tracking-wider">
               {workoutExercise.Exercises.name}
             </p>
+            {errors &&
+              errors.some((error) => error.exercise === workoutExercise.id) && (
+                <p className="text-amber-900 uppercase text-xs font-semibold">
+                  Keskeneräisiä sarjoja
+                </p>
+              )}
             <table className="w-full">
               <thead className="border-b border-zinc-800 text-zinc-500 text-sm ">
                 <tr>
+                  <th></th>
                   <th className="w-12 text-center">#</th>
                   <th className="whitespace-nowrap">Toistot</th>
                   <th className="whitespace-nowrap">Painot (kg)</th>
@@ -93,9 +200,32 @@ export function ActiveWorkout({ workout }: { workout: Workout }) {
               <tbody>
                 {workoutExercise.WorkoutTemplateSets.map((set, index) => (
                   <tr key={set.id}>
+                    <td
+                      onClick={() =>
+                        markSetCompleted(workoutExercise.id, set.id)
+                      }
+                    >
+                      <svg
+                        className={`w-5 h-5 mx-auto text-emerald-800 hover:bg-emerald-800 rounded-full cursor-pointer ${set.finished && "bg-emerald-800"}`}
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                      >
+                        <circle cx="12" cy="12" r="10" />
+                      </svg>
+                    </td>
                     <td className="text-center py-2.5">{index + 1}</td>
                     <td className="text-center py-2.5">
                       <input
+                        onChange={(e) =>
+                          updateValue(
+                            Number(e.target.value),
+                            workoutExercise.id,
+                            set.id,
+                            "reps",
+                          )
+                        }
                         className="[appearance:textfield] p-1 text-center border border-zinc-800 w-15 rounded-lg "
                         type="number"
                         name="workoutReps"
@@ -104,13 +234,21 @@ export function ActiveWorkout({ workout }: { workout: Workout }) {
                     </td>
                     <td className="text-center py-2.5">
                       <input
+                        onChange={(e) =>
+                          updateValue(
+                            Number(e.target.value),
+                            workoutExercise.id,
+                            set.id,
+                            "weight",
+                          )
+                        }
                         className="[appearance:textfield] p-1 text-center border border-zinc-800 w-15 rounded-lg "
                         type="number"
                         name="workoutWeight"
                         placeholder={String(set.weight)}
                       />
                     </td>
-                    <td>
+                    <td onClick={() => removeSet(workoutExercise.id, set.id)}>
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"
@@ -132,6 +270,12 @@ export function ActiveWorkout({ workout }: { workout: Workout }) {
             </table>
           </div>
         ))}
+        <button
+          onClick={() => finishWorkout()}
+          className="p-2 w-full bg-emerald-800 cursor-pointer hover:bg-emerald-900 rounded-lg"
+        >
+          Lopeta treeni
+        </button>
       </div>
     </div>
   );
