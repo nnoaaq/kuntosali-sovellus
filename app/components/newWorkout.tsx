@@ -30,7 +30,7 @@ export function CreateWorkout({
 }) {
   const [exerciseName, setExerciseName] = useState<string | null>(null);
   const [addedExercises, setAddedExercises] = useState<Exercises[]>([]);
-  const [showGroup, setShowGroup] = useState<string>("Kädet");
+  const [showGroup, setShowGroup] = useState<string>("Rinta");
   const [showForm, setShowForm] = useState(false);
   const [nameError, setNameError] = useState(false);
   const [exerciseError, setExerciseError] = useState(false);
@@ -50,8 +50,8 @@ export function CreateWorkout({
             {
               id: crypto.randomUUID(),
               order: addedExercise.sets.length + 1,
-              reps: 0,
-              weight: 0,
+              reps: addedExercise.sets[0].reps,
+              weight: addedExercise.sets[0].weight,
             },
           ],
         };
